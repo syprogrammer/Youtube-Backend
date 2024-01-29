@@ -3,7 +3,7 @@ import Video from "../models/video.model.js";
 import { MyUserRequest } from "../types/types.js"
 import User from "../models/user.model.js";
 export const addVideo = asyncErrorHandler(async (req: MyUserRequest, res, next) => {
-   
+
     const newVideo = new Video({
         userId: req.user.id,
         ...req.body
@@ -136,11 +136,11 @@ export const getSubscribedVideos = asyncErrorHandler(async (req: MyUserRequest, 
 
 
 export const getByTag = asyncErrorHandler(async (req: MyUserRequest, res, next) => {
-
-    if (!req.query.tags) {
+    let queryTags = req.query.tags
+    if (!queryTags) {
         return next(new ErrorHandler("No query tags found", 404))
     }
-    const tags = req.query.tags.split(",")
+    const tags = (queryTags as string).split(",")
     console.log(tags)
     const videos = await Video.find({ tags: { $in: tags } }).limit(20)
 
