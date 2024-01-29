@@ -1,6 +1,8 @@
 import { MyUserRequest } from "../types/types.js";
 import ErrorHandler, { asyncErrorHandler } from "../utils/errorHandler.js";
 import User from "../models/user.model.js";
+import Video from "../models/video.model.js";
+
 
 export const updateUser = asyncErrorHandler(async (req: MyUserRequest, res, next) => {
     if (!req.params.id) {
@@ -92,22 +94,37 @@ export const unsubscribe = asyncErrorHandler(async (req: MyUserRequest, res, nex
 
 // like a video 
 export const like = asyncErrorHandler(async (req: MyUserRequest, res, next) => {
-    if (!req.params.id) {
-        return next(new ErrorHandler("Enter valid id", 400))
+    const userId = req.user.id
+    const videoId = req.params.videoId
+    if (!videoId) {
+        return next(new ErrorHandler("Enter valid video id", 400))
     }
+    const video = await Video.findByIdAndUpdate(videoId, {
+        $addToSet: { likes: userId },
+        $pull: { dislikes: userId }
+    })
+   
     return res.status(200).json({
         success: true,
-        message: "user logged in successfully"
+        message: "liked successfully",
+        video
     })
 })
 
 //dislike a video
 export const dislike = asyncErrorHandler(async (req: MyUserRequest, res, next) => {
-    if (!req.params.id) {
-        return next(new ErrorHandler("Enter valid id", 400))
+    const userId = req.user.id
+    const videoId = req.params.videoId
+    if (!videoId) {
+        return next(new ErrorHandler("Enter valid video id", 400))
     }
+    const video = await Video.findByIdAndUpdate(videoId, {
+        $addToSet: { dislikes: userId },
+        $pull: { likes: userId }
+    })
     return res.status(200).json({
         success: true,
-        message: "user logged in successfully"
+        message: "disliked successfully",
+        video
     })
 })
